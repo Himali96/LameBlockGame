@@ -15,6 +15,7 @@ public class PlayerBehaviour : MonoBehaviour
     [Header("Ground Detection")]
     public Transform groundCheck;
     public float groundRadius;
+    public Vector2 groundSize;
     public LayerMask groundLayerMask;
     public bool isGrounded, isJumping, isGameOver, isReadyToStartCar, isOnMovableGround;
 
@@ -47,23 +48,19 @@ public class PlayerBehaviour : MonoBehaviour
     {
         Movement();
     }
-
+    float time_t;
     private void Movement()
     {
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, groundLayerMask);
+        isGrounded = Physics2D.OverlapBox(groundCheck.position, groundSize, 0, groundLayerMask);
 
         run = Input.GetAxisRaw("Horizontal");
         crouch = Input.GetAxisRaw("Vertical");
 
-        Jump();
 
-        if (run > 0)
+        if (run != 0)
         {
             Move();
-        }
-        else if (run < 0)
-        {
-            Move();
+            Jump();
         }
         else if (isGrounded)
         {
@@ -71,16 +68,23 @@ public class PlayerBehaviour : MonoBehaviour
                 rigidBody2D.velocity = Vector2.zero;
             Jump();
         }
+        if (Mathf.Abs(run) > 0)
+        {
+            if(time_t < 13) time_t += 0.7f;
+        } else  time_t = 0;
         if (isJumping && crouch < 0)
         {
-            rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, verticalForce * downForce);
+            rigidBody2D.velocity = new Vector2(run * time_t, verticalForce * downForce);
         }
     }
 
     void Move()
     {
         run = Flip(run);
-        rigidBody2D.velocity = new Vector2(run * horizontalForce, rigidBody2D.velocity.y);
+        if(!isJumping)
+            rigidBody2D.velocity = new Vector2(run * horizontalForce, rigidBody2D.velocity.y);
+        else
+            rigidBody2D.velocity = new Vector2(run * time_t, rigidBody2D.velocity.y);
     }
 
     void Jump()
@@ -90,7 +94,7 @@ public class PlayerBehaviour : MonoBehaviour
         {
             if (isGrounded || isOnMovableGround)
             {
-                rigidBody2D.velocity = new Vector2(0, verticalForce);
+                rigidBody2D.velocity = new Vector2(run * time_t, verticalForce);
                 isJumping = true;
             }
         }
@@ -108,7 +112,7 @@ public class PlayerBehaviour : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.magenta;
-        Gizmos.DrawWireSphere(groundCheck.position, groundRadius);
+        Gizmos.DrawWireCube(groundCheck.position, groundSize);
     }
 
     public void OnCollisionStay2D(Collision2D col)
@@ -134,6 +138,7 @@ public class PlayerBehaviour : MonoBehaviour
 
         if (col.gameObject.tag == "Car")
         {
+            horizontalForce = 4;
             isOnMovableGround = true;
             isReadyToStartCar = true;
         } else
@@ -146,6 +151,7 @@ public class PlayerBehaviour : MonoBehaviour
     {
         if (col.gameObject.tag == "Car")
         {
+            horizontalForce = 12;
             isOnMovableGround = false;
             isReadyToStartCar = true;
         }
