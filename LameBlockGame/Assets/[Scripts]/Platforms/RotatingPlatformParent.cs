@@ -6,16 +6,24 @@ public class RotatingPlatformParent : MonoBehaviour
 {
     public List<Transform> rotatingChilds;
 
-    private float speed;
+    private float speed, timer;
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        speed = 30 * Time.deltaTime;
-        transform.Rotate(new Vector3(0, 0, -speed));
-        for (int i = 0; i < rotatingChilds.Count; i++)
+        if (timer < 10)
         {
-            rotatingChilds[i].Rotate(new Vector3(0, 0, speed));
+            if (timer < 5)
+            {
+                speed = 30 * Time.deltaTime;
+                transform.Rotate(new Vector3(0, 0, -speed));
+                for (int i = 0; i < rotatingChilds.Count; i++)
+                {
+                    rotatingChilds[i].Rotate(new Vector3(0, 0, speed));
+                }
+            }
+            timer += 0.0335f;
         }
+        else timer = 0;
     }
 }
