@@ -17,7 +17,7 @@ public class UI_Counter : MonoBehaviour
     public bool isDead, isLifeOver;
     public AudioSource deathSound;
     public GameObject diamondParticle, keyParticle, keySprite;
-    public List<GameObject> collapsingPlatforms;
+    public List<GameObject> collapsingPlatforms, tiltingPlatforms;
 
     private void Awake()
     {
@@ -62,6 +62,10 @@ public class UI_Counter : MonoBehaviour
         {
             collapsingPlatforms[i].GetComponent<CollapsingPlatform>().ResetValues();
             collapsingPlatforms[i].SetActive(true);
+        }
+        for (int i = 0; i < tiltingPlatforms.Count; i++)
+        {
+            tiltingPlatforms[i].transform.localEulerAngles = Vector3.zero;
         }
 
         if (lifesLeft < 1)
